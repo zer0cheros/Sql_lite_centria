@@ -3,15 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sqlite</title>
+    <title>User Management</title>
+    <script>
+       
+        async function fetchUsers() {
+            const response = await fetch('/users');
+            const users = await response.json();
+            const tableBody = document.getElementById("user-table-body");
+            tableBody.innerHTML = "";
+
+            users.forEach(user => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td><input type="text" value="${user.name}" id="name-${user.id}"></td>
+                    <td><input type="email" value="${user.email}" id="email-${user.id}"></td>
+                    <td>
+                        <button onclick="updateUser(${user.id})">Update</button>
+                        <button onclick="deleteUser(${user.id})">Delete</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        async function addUser() {
+            const name = document.getElementById("add-name").value;
+            const email = document.getElementById("add-email").value;
+            const password = document.getElementById("add-pass").value;
+            const response = await fetch('/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
+            alert(await response.text());
+            fetchUsers(); 
+        }
+
+
+        async function updateUser(id) {
+            const name = document.getElementById(`name-${id}`).value;
+            const email = document.getElementById(`email-${id}`).value;
+            const response = await fetch(`/users/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email })
+            });
+            alert(await response.text());
+            fetchUsers(); 
+        }
+
+        async function deleteUser(id) {
+            const response = await fetch(`/users/${id}`, { method: 'DELETE' });
+            alert(await response.text());
+            fetchUsers(); 
+        }
+
+      
+        window.onload = fetchUsers;
+    </script>
 </head>
 <body>
-    <h1>Sqlite</h1>
-    <form action="/api/add" method="post">
-        <input type="text" name="name" placeholder="Name">
-        <input type="text" name="email" placeholder="Email">
-        <input type="password" name="password" placeholder="Password">
-        <button type="submit">Add</button>
-    </form>
+    <h1>User Management</h1>
+
+    <h2>Add User</h2>
+    <input type="text" id="add-name" placeholder="Name" required>
+    <input type="email" id="add-email" placeholder="Email" required>
+    <input type="password" id="add-pass" placeholder="Password" required>
+    <button onclick="addUser()">Add User</button>
+
+    <h2>All Users</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="user-table-body">
+           
+        </tbody>
+    </table>
 </body>
 </html>
