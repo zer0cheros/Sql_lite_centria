@@ -1,10 +1,12 @@
 const express = require('express');
 const { db } = require('./db');
+const cors = require('cors');
 const app = express();
 const port = 3000;
 // app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 // Function to create 'users' table if it doesn't exist
 const createUsersTable = async () => {
     try {
@@ -47,7 +49,7 @@ app.post('/users', async (req, res) => {
     }
     try {
         await db('users').insert({ name, email, password });
-        res.send("User added successfully!");
+        res.json({msg: "User added successfully!"});
     } catch (error) {
         console.error(error);
         res.status(500).send("Error adding user");
