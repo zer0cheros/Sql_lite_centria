@@ -48,13 +48,15 @@ app.post('/users', async (req, res) => {
         return res.status(400).send("Name and Email are required.");
     }
     try {
-        await db('users').insert({ name, email, password });
-        res.json({msg: "User added successfully!"});
+        const [id] = await db('users').insert({ name, email, password });
+        const newUser = await db('users').where({ id }).first();
+        res.json(newUser);
     } catch (error) {
         console.error(error);
         res.status(500).send("Error adding user");
     }
 });
+
 
 
 app.put('/users/:id', async (req, res) => {
